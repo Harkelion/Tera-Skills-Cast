@@ -52,6 +52,7 @@ module.exports = function tsl(mod) {
       );
     }
     if (arg == "save") {
+      reformateSkillList();
       saveJsonData(settingsPath, skill_list);
     }
     if (arg == "reset") {
@@ -77,12 +78,23 @@ module.exports = function tsl(mod) {
   function addSkill(skillId) {
     skill_list[skillNumber] = {
       skillName: skillsName.skillId,
-      startTime:
+      castTime:
         skillNumber == 0 ? 0 : startTimeNewSkill - startTimePreviousSkill,
       currentSpeed: aspd,
     };
     startTimePreviousSkill = Date.now();
     skillNumber++;
+  }
+
+  function reformateSkillList() {
+    for (const element in skill_list) {
+      if (parseInt(element) + 1 > Object.keys(skill_list).length) {
+        skill_list[parseInt(element)].castTime = 0;
+      } else {
+        skill_list[parseInt(element)].castTime =
+          skill_list[parseInt(element) + 1].castTime;
+      }
+    }
   }
 
   function saveJsonData(pathToFile, data) {
