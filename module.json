@@ -1,0 +1,16 @@
+{
+  "disableAutoUpdate": false,
+  "name": "TSL",
+  "author": "Hark",
+  "description": "",
+  "version": "1.0",
+  "options": {
+    "niceName": "TSL",
+    "reloadable": true
+  },
+  "dependencies": {
+    "library": "https://raw.githubusercontent.com/Kaseaa/library/master/module.json"
+  },
+  "servers": [""],
+  "supportUrl": ""
+}
