@@ -178,6 +178,7 @@ module.exports = function tsl(mod) {
   function addSkill(skillId) {
     skills_list[skillNumber] = {
       skillName: `${skillsName[Math.floor(skillId / 10000)]}-${skillId % 100}`,
+      SkillId: skillId,
       castTime:
         skillNumber == 0 ? 0 : startTimeNewSkill - startTimePreviousSkill,
       currentSpeed: aspd * 100,
