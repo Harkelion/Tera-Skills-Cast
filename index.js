@@ -9,27 +9,15 @@ module.exports = function tsl(mod) {
   const { command } = mod;
   const { player } = mod.require.library;
   const skillsData = require("./skillsData.json");
-  const jobsName = {
-    0: "Warrior",
-    1: "Lancer",
-    2: "Slayer",
-    3: "Berzerk",
-    4: "Sorcerer",
-    5: "Archer",
-    6: "Priest",
-    7: "Mystic",
-    8: "Reaper",
-    9: "Gunner",
-    10: "Brawler",
-    11: "Ninja",
-    12: "Valkyrie",
-  };
+  const jobsName = Object.keys(skillsData);
+  const abnormality = require("./abData.json");
 
   let isEnabled = true,
     skills_list = {},
     skills_mean = {},
     aspd = player["aspd"],
     aspdDivider = aspd,
+    additionalAS = 0,
     skillNumber = 0,
     playerName = null,
     startTimeNewSkill = 0,
@@ -40,14 +28,16 @@ module.exports = function tsl(mod) {
     myName = null,
     playerId = null,
     animDuration,
-    playerIdHooked,
+    playerHooked1,
+    playerHooked2,
+    playerHooked3,
+    jobNumber,
     skills_listPath = `./data/skills_list-${jobsName[jobNumber]}-${
       playerName != null ? playerName : myName
     }.json`,
     skills_meanPath = `./data/skills_mean-${jobsName[jobNumber]}-${
       playerName != null ? playerName : myName
-    }.json`,
-    jobNumber;
+    }.json`;
 
   const skillsName = skillsData[jobsName[jobNumber]];
 
@@ -82,11 +72,14 @@ module.exports = function tsl(mod) {
     if (arg1 == "target") {
       if (arg2 != null) {
         command.message("Skills List target is now " + arg2);
+        command.message("Please inspect the player to get his attackspeed");
         playerName = arg2;
-        playerIdHooked = false;
+        playerHooked1 = false;
       } else {
-        command.message("Please enter a name");
+        playerHooked2 = false;
+        command.message("Please inspect the player");
       }
+      playerHooked3 = false;
     }
   });
 
@@ -100,8 +93,24 @@ module.exports = function tsl(mod) {
   });
 
   mod.hook("S_PLAYER_STAT_UPDATE", 14, (event) => {
+    if (!isEnabled || playerName != null) return;
+    calculTrueAS(event.attackSpeed, event.attackSpeedBonus, 0);
+    debug ? console.log("aspd :" + aspd) : "";
+    debug ? console.log("aspdDivider :" + aspdDivider) : "";
+  });
+
+  mod.hook("S_USER_PAPERDOLL_INFO", 15, (event) => {
     if (!isEnabled) return;
-    aspd = (event.attackSpeed + event.attackSpeedBonus) / aspdDivider;
+    if (!playerHooked2) {
+      playerHooked2 = true;
+      playerId = event.gameId;
+      jobNumber = (event.templateId - 10101) % 100;
+      playerName = event.name;
+      command.message(playerName + " found ! Class : " + jobsName[jobNumber]);
+    }
+    if (playerName != null) {
+      calculTrueAS(event.attackSpeed, event.attackSpeedBonus, additionalAS);
+    }
     debug ? console.log("aspd :" + aspd) : "";
     debug ? console.log("aspdDivider :" + aspdDivider) : "";
   });
@@ -153,20 +162,44 @@ module.exports = function tsl(mod) {
 
   mod.hook("S_SPAWN_USER", 17, (event) => {
     if (!isEnabled) return;
-    if ((event.name = playerName) && playerName != null && !playerIdHooked) {
-      playerIdHooked = true;
+    if ((event.name = playerName) && playerName != null && !playerHooked1) {
+      playerHooked1 = true;
       playerId = event.gameId;
       jobNumber = (event.templateId - 10101) % 100;
       command.message(playerName + " found ! Class : " + jobsName[jobNumber]);
-      debug ? console.log("playerId hooked : " + playerIdHooked) : "";
+      debug ? console.log("playerId hooked : " + playerHooked1) : "";
       debug ? console.log("id : " + event.playerId) : "";
       debug ? console.log("gameId : " + event.gameId) : "";
+    }
+  });
+
+  mod.hook("S_ABNORMALITY_BEGIN.", 4, (event) => {
+    if (!isEnabled) return;
+    if ((event.target = playerId)) {
+      if (!playerHooked3) {
+        additionalAS = additionalAS - abnormality[event.id].as;
+        playerHooked3 = true;
+      } else {
+        additionalAS = additionalAS + abnormality[event.id].as;
+      }
+      debug ? console.log("additionalAS : " + additionalAS) : "";
+    }
+  });
+
+  d.hook("S_ABNORMALITY_END.", 1, (event) => {
+    if (!isEnabled) return;
+    if ((event.target = playerId)) {
+      additionalAS = additionalAS - abnormality[event.id].as;
     }
   });
 
   // mod.hook('C_CANCEL_SKILL', 3, event => {
 
   // });
+
+  function calculTrueAS(defaultAS, bonusAS, additionalAS) {
+    aspd = (defaultAS + bonusAS + additionalAS) / aspdDivider;
+  }
 
   function reset() {
     skillNumber = 0;
