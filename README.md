@@ -19,6 +19,6 @@ note : for yourself only work when you are in combat / for other's player work a
 known issues :
 
 - other's player skill hook don't work yet [working on it].
-- i don't know yet how to hook current attack speed of other's player
+- i don't know yet how to hook updated attack speed of other's player (fix?)
 
 Contact Discord : Harkelion#8888
