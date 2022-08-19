@@ -11,7 +11,7 @@ Create a list of the target's rotation and information about each skill (as curr
                                (target by default is yourself)
 /8 list target "player name" : will target "player name" (will auto-inspect when possible)
 /8 list save                 : create two .json, one of the rotation the other one of the average
-                               animation skills of the target (reset after save)
+                               animation skills (reset after save)
 ```
 
 note : for yourself only work when you are in combat / for other's player work anytime
