@@ -1,6 +1,6 @@
 # Tera Skills List
 
-Create a list of your rotation and information about each skill (as current attack Speed and time between each cast) 
+Create a list of the target's rotation and information about each skill (as current attack Speed and time between each cast) 
 
 #### Command : /8 (or ! in any chat except toolbox /8) 
 ```txt
@@ -14,6 +14,8 @@ Create a list of your rotation and information about each skill (as current atta
 
 note : for yourself only work when you are in combat / for other's player work anytime
 
-(known issue : other's player skill hook don't work yet, working on it)
+known issues : 
+ - other's player skill hook don't work yet [working on it].
+ - i don't know yet how to  hook current attack speed of other's player 
 
 Contact Discord : Harkelion#8888
