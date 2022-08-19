@@ -71,7 +71,6 @@ module.exports = function tsl(mod) {
     if (arg1 == "target") {
       if (arg2 != null) {
         command.message("Skills List target is now " + arg2);
-        command.message("Please inspect the player to get his attackspeed");
         playerName = arg2;
         playerHooked1 = false;
       } else {
@@ -97,6 +96,23 @@ module.exports = function tsl(mod) {
     debug ? console.log("aspdDivider :" + aspdDivider) : "";
   });
 
+  mod.hook("S_SPAWN_USER", 17, (event) => {
+    if (!isEnabled) return;
+    if ((event.name = playerName) && playerName != null && !playerHooked1) {
+      playerHooked1 = true;
+      playerId = event.gameId;
+      jobNumber = (event.templateId - 10101) % 100;
+      mod.send("C_REQUEST_USER_PAPERDOLL_INFO", 4, {
+        zoom: false,
+        name: playerName,
+      });
+      command.message(playerName + " found ! Class : " + jobsName[jobNumber]);
+      debug ? console.log("playerId hooked : " + playerHooked1) : "";
+      debug ? console.log("id : " + event.playerId) : "";
+      debug ? console.log("gameId : " + event.gameId) : "";
+    }
+  });
+
   mod.hook("S_USER_PAPERDOLL_INFO", 15, (event) => {
     if (!isEnabled) return;
     if (!playerHooked2) {
@@ -111,20 +127,7 @@ module.exports = function tsl(mod) {
     }
     debug ? console.log("aspd :" + aspd) : "";
     debug ? console.log("aspdDivider :" + aspdDivider) : "";
-  });
-
-  mod.hook("S_SPAWN_USER", 17, (event) => {
-    if (!isEnabled) return;
-    if ((event.name = playerName) && playerName != null && !playerHooked1) {
-      playerHooked1 = true;
-      playerId = event.gameId;
-      jobNumber = (event.templateId - 10101) % 100;
-
-      command.message(playerName + " found ! Class : " + jobsName[jobNumber]);
-      debug ? console.log("playerId hooked : " + playerHooked1) : "";
-      debug ? console.log("id : " + event.playerId) : "";
-      debug ? console.log("gameId : " + event.gameId) : "";
-    }
+    return;
   });
 
   mod.hook("S_ABNORMALITY_BEGIN.", 4, (event) => {
