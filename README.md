@@ -14,7 +14,11 @@ Create a list of the target's rotation and information about each skill (as curr
                                animation skills (reset after save)
 ```
 
-note : for yourself only work when you are in combat / for other's player work anytime
+note : for yourself only work when you are in combat, for other's player work after getting the target
+
+#### Future changes :
+
+add : list start when boss is engaged
 
 #### Objective of the mod :
 
