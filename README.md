@@ -20,8 +20,6 @@ note : for yourself only work when you are in combat / for other's player work a
 
 Be able to detect player with animation cancel (or not) to know with who you can compare HPMs. 
 
-(Not supposed to be use to harm scripter, in my opinion everyone enjoy the game how they want, until it don't disturb other's experience.)
-
 #### known issues :
 
 - other's player skill hook don't work yet [working on it].
