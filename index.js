@@ -79,7 +79,7 @@ module.exports = function tsl(mod) {
         "Skills List Debug is now " + (debug ? "enabled" : "disabled") + "."
       );
     }
-    if (arg1 == "name") {
+    if (arg1 == "target") {
       if (arg2 != null) {
         command.message("Skills List target is now " + arg2);
         playerName = arg2;
