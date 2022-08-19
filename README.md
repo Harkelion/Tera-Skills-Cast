@@ -22,7 +22,6 @@ Be able to detect player with animation cancel (or not) to know with who you can
 
 #### known issues :
 
-- other's player skill hook don't work yet [working on it].
-- i don't know yet how to hook updated attack speed of other's player (fix?)
+- i don't know yet how to hook updated attack speed of other's player (fix thx to abnormalities?)
 
 Contact Discord : Harkelion#8888
