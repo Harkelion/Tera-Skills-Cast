@@ -1,11 +1,11 @@
 {
   "disableAutoUpdate": true,
-  "name": "TSL",
+  "name": "TSC",
   "author": "Hark",
   "description": "Wanna know if someone use animiation cancel ?",
   "version": "1.0",
   "options": {
-    "niceName": "TSL",
+    "niceName": "TSC",
     "reloadable": true
   },
   "dependencies": {
