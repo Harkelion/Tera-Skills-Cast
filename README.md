@@ -7,7 +7,8 @@ create a list of your rotation and information about each skill (as current atta
 /8 list                    : enable/disable (reset when disable)
 /8 list reset              : reset all skills register
 /8 list name "player name" : will target "player name" to make his skills list (target by default is yourself)
-/8 list save               : create two .json, one of the rotation the other one of the average animation skills of the target (reset after save)
+/8 list save               : create two .json, one of the rotation the other one of the average animation 
+                             skills of the target (reset after save)
 
 ```
 for yourself only work when you are in combat / for other's player work anytime
