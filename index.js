@@ -37,7 +37,7 @@ module.exports = function tsl(mod) {
 
   let skillsName = skillsData[jobsName[jobNumber]];
 
-  command.add("list", (arg1, arg2) => {
+  command.add("cast", (arg1, arg2) => {
     if (arg1 == null) {
       isEnabled = !isEnabled;
       if (!isEnabled) {
