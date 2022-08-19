@@ -1,8 +1,8 @@
 const fs = require("fs"),
   path = require("path");
 
-if (!fs.existsSync(path.join(__dirname, "./data"))) {
-  fs.mkdirSync(path.join(__dirname, "./data"));
+if (!fs.existsSync(path.join(__dirname, "./save"))) {
+  fs.mkdirSync(path.join(__dirname, "./save"));
 }
 
 module.exports = function tsl(mod) {
