@@ -10,6 +10,8 @@ create a list of your rotation and information about each skill (as current atta
 /8 list save               : create two .json, one of the rotation the other one of the average animation skills of the target
 
 ```
+for yourself only work when you are in combat / for other's player work anytime
+
 (still in progress)
 
 Contact Discord : Harkelion#8888
