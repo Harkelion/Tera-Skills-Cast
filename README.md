@@ -12,6 +12,6 @@ create a list of your rotation and information about each skill (as current atta
 ```
 for yourself only work when you are in combat / for other's player work anytime
 
-(still in progress)
+(still in progress : other's player skill hook don't work yet)
 
 Contact Discord : Harkelion#8888
