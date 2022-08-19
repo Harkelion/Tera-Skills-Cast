@@ -20,8 +20,4 @@ note : for yourself only work when you are in combat / for other's player work a
 
 Be able to detect player with animation cancel (or not) to know with who you can compare HPMs. 
 
-#### known issues :
-
-- i don't know yet how to hook updated attack speed of other's player (fix thx to abnormalities?)
-
 Contact Discord : Harkelion#8888
