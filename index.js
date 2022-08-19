@@ -23,15 +23,14 @@ module.exports = function tsl(mod) {
     startTimeNewSkill = 0,
     startTimePreviousSkill = 0,
     debug = false,
-    previousSkill,
     myID = null,
     myName = null,
     playerId = null,
-    animDuration,
-    playerHooked1,
-    playerHooked2,
-    playerHooked3,
-    jobNumber,
+    animDuration = null,
+    playerHooked1 = null,
+    playerHooked2 = null,
+    playerHooked3 = null,
+    jobNumber = null,
     skills_listPath = `./data/skills_list-${jobsName[jobNumber]}-${
       playerName != null ? playerName : myName
     }.json`,
@@ -86,7 +85,6 @@ module.exports = function tsl(mod) {
   mod.hook("S_LOGIN", 14, (event) => {
     if (!isEnabled) return;
     jobNumber = (event.templateId - 10101) % 100;
-    aspdDivider = jobNumber >= 8 ? 100 : aspd;
     myID = event.gameId;
     myName = event.gameId;
     debug ? console.log("playerId :" + event.gameId) : "";
@@ -115,6 +113,41 @@ module.exports = function tsl(mod) {
     debug ? console.log("aspdDivider :" + aspdDivider) : "";
   });
 
+  mod.hook("S_SPAWN_USER", 17, (event) => {
+    if (!isEnabled) return;
+    if ((event.name = playerName) && playerName != null && !playerHooked1) {
+      playerHooked1 = true;
+      playerId = event.gameId;
+      jobNumber = (event.templateId - 10101) % 100;
+
+      command.message(playerName + " found ! Class : " + jobsName[jobNumber]);
+      debug ? console.log("playerId hooked : " + playerHooked1) : "";
+      debug ? console.log("id : " + event.playerId) : "";
+      debug ? console.log("gameId : " + event.gameId) : "";
+    }
+  });
+
+  mod.hook("S_ABNORMALITY_BEGIN.", 4, (event) => {
+    if (!isEnabled) return;
+    if ((event.target = playerId)) {
+      if (!playerHooked3) {
+        additionalAS = additionalAS - abnormality[event.id].as;
+        playerHooked3 = true;
+      } else {
+        additionalAS = additionalAS + abnormality[event.id].as;
+      }
+      debug ? console.log("additionalAS : " + additionalAS) : "";
+    }
+  });
+
+  d.hook("S_ABNORMALITY_END.", 1, (event) => {
+    if (!isEnabled) return;
+    if ((event.target = playerId)) {
+      additionalAS = additionalAS - abnormality[event.id].as;
+      debug ? console.log("additionalAS : " + additionalAS) : "";
+    }
+  });
+
   mod.hook(
     "S_ACTION_STAGE",
     9,
@@ -123,13 +156,6 @@ module.exports = function tsl(mod) {
       if (!isEnabled) return;
       if (myID == event.gameId && player.inCombat) {
         debug ? console.log("My Skill :" + event.gameId) : "";
-        // if (
-        //   previousSkill == event.skill.id ||
-        //   !Object.keys(skillsName).includes(
-        //     JSON.stringify(Math.floor(event.skill.id / 10000))
-        //   )
-        // )
-        //   return;
         startTimeNewSkill = Date.now();
         animDuration = event.animSeq[0];
         debug
@@ -160,52 +186,13 @@ module.exports = function tsl(mod) {
     }
   );
 
-  mod.hook("S_SPAWN_USER", 17, (event) => {
-    if (!isEnabled) return;
-    if ((event.name = playerName) && playerName != null && !playerHooked1) {
-      playerHooked1 = true;
-      playerId = event.gameId;
-      jobNumber = (event.templateId - 10101) % 100;
-      command.message(playerName + " found ! Class : " + jobsName[jobNumber]);
-      debug ? console.log("playerId hooked : " + playerHooked1) : "";
-      debug ? console.log("id : " + event.playerId) : "";
-      debug ? console.log("gameId : " + event.gameId) : "";
-    }
-  });
-
-  mod.hook("S_ABNORMALITY_BEGIN.", 4, (event) => {
-    if (!isEnabled) return;
-    if ((event.target = playerId)) {
-      if (!playerHooked3) {
-        additionalAS = additionalAS - abnormality[event.id].as;
-        playerHooked3 = true;
-      } else {
-        additionalAS = additionalAS + abnormality[event.id].as;
-      }
-      debug ? console.log("additionalAS : " + additionalAS) : "";
-    }
-  });
-
-  d.hook("S_ABNORMALITY_END.", 1, (event) => {
-    if (!isEnabled) return;
-    if ((event.target = playerId)) {
-      additionalAS = additionalAS - abnormality[event.id].as;
-    }
-  });
-
   // mod.hook('C_CANCEL_SKILL', 3, event => {
 
   // });
 
   function calculTrueAS(defaultAS, bonusAS, additionalAS) {
+    aspdDivider = jobNumber >= 8 ? 100 : defaultAS;
     aspd = (defaultAS + bonusAS + additionalAS) / aspdDivider;
-  }
-
-  function reset() {
-    skillNumber = 0;
-    skills_list = {};
-    playerId = null;
-    playerName = null;
   }
 
   function addSkill(skillId) {
@@ -282,7 +269,7 @@ module.exports = function tsl(mod) {
       }
       skills_list[element].animCalculed = Math.floor(
         (skills_list[element].castTime * skills_list[element].currentSpeed) /
-          aspdDivider
+          100
       );
     }
     debug ? console.log("reform :" + skills_list) : "";
@@ -298,5 +285,26 @@ module.exports = function tsl(mod) {
       path.join(__dirname, pathToFile),
       JSON.stringify(data, null, "    ")
     );
+  }
+
+  function reset() {
+    skills_list = {};
+    skills_mean = {};
+    aspd = player["aspd"];
+    aspdDivider = 100;
+    additionalAS = 0;
+    skillNumber = 0;
+    playerName = null;
+    startTimeNewSkill = 0;
+    startTimePreviousSkill = 0;
+    debug = false;
+    myID = null;
+    myName = null;
+    playerId = null;
+    animDuration = null;
+    playerHooked1 = null;
+    playerHooked2 = null;
+    playerHooked3 = null;
+    jobNumber = null;
   }
 };
