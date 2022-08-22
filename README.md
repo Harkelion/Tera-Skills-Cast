@@ -1,7 +1,7 @@
 # Tera Skills Cast
 
 Record all skills of the target's rotation and information about each skills (as current attack Speed and time between each cast)
-(note : still working on it might be broken) 
+(note : still working on it, might be broken) 
 
 #### Command : /8 (or ! in any chat except toolbox /8)
 
