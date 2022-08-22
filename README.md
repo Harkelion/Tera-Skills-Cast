@@ -27,6 +27,6 @@ Be able to detect player with animation cancel (or not) to know with who you can
 #### Future change :
 
 - add a cancel detector
-- 
+- multiple target possible + target all party as command 
 
 Contact Discord : Harkelion#8888
