@@ -11,7 +11,7 @@ Record all skills of the target's rotation and information about each skills (as
 /8 cast boss                 : only starts skill recording when the boss is engaged (toggle on/off)
 /8 cast target               : will target the next player you inspect to make his skills list
                                (target by default is yourself) (auto-reset)
-/8 cast target "player name" : will target "player name" (auto-reset)
+/8 cast target "player name" : will target "player name"
 /8 cast save                 : create two .json, one of the rotation the other one of the average
                                animation skills (auto-reset after save)
 ```
