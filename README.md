@@ -5,12 +5,12 @@ Create a list of the target's rotation and information about each skill (as curr
 #### Command : /8 (or ! in any chat except toolbox /8)
 
 ```txt
-/8 list                      : enable/disable (reset when disable)
-/8 list reset                : reset all skills register
-/8 list target               : will target the next player you inspect to make his skills list
+/8 cast                      : enable/disable (reset when disable)
+/8 cast reset                : reset all skills register
+/8 cast target               : will target the next player you inspect to make his skills list
                                (target by default is yourself)
-/8 list target "player name" : will target "player name" (will auto-inspect when possible)
-/8 list save                 : create two .json, one of the rotation the other one of the average
+/8 cast target "player name" : will target "player name" (will auto-inspect when possible)
+/8 cast save                 : create two .json, one of the rotation the other one of the average
                                animation skills (reset after save)
 ```
 
@@ -22,7 +22,6 @@ Be able to detect player with animation cancel (or not) to know with who you can
 
 #### known issues :
 
-- other's player skill hook don't work yet [working on it].
-- i don't know yet how to hook updated attack speed of other's player (fix?)
+- None (atm)
 
 Contact Discord : Harkelion#8888
