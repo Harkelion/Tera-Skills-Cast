@@ -1,94 +1,38 @@
 {
-  "999001052": {
-    "name": "Brooch",
-    "as": 12
-  },
-  "70254": {
-    "name": "Rootbeer",
-    "as": 20
-  },
-  "6055": {
-    "name": "Rootbeer",
-    "as": 20
-  },
-  "200701": {
-    "name": "Arush (self)",
-    "as": 20
-  },
-  "201903": {
-    "name": "Arush",
-    "as": 20
-  },
-  "101300": {
-    "name": "Traverse Cut",
-    "as": 11.7
-  },
-  "101301": {
-    "name": "Traverse Cut self?",
-    "as": 11.7
-  },
-  "103104": {
-    "name": "Shadow Tempest II",
-    "as": 7
-  },
   "10155130": {
     "name": "Ragnarok",
-    "as": 20
-  },
-  "10155512": {
-    "name": "Godsfall",
-    "as": 25
-  },
-  "801503": {
-    "name": "Energy Stars IV",
-    "as": 8
-  },
-  "603": {
-    "name": "Titanic Wrath III",
-    "as": 9.6
-  },
-  "4833": {
-    "name": "Bravery",
-    "as": 6
-  },
-  "70244": {
-    "name": "Hot Fish Buffet",
-    "as": 3
+    "job": "Valkyrie",
+    "SkillsImpossible": "end",
+    "skillsId": [
+      166200, 166220, 166230, 235100, 235101, 235102, 235109, 245100, 245101,
+      245102, 245103, 245104, 245109, 156100, 156130, 136100, 136130, 115400,
+      115401, 115430, 115431, 106100, 106120, 106130, 96100, 96130, 85100,
+      85101, 85130, 75900, 75901, 75902, 75930, 66200, 66230, 55500, 55530,
+      46000, 46010, 35900, 35930, 25700, 25730
+    ]
   },
   "300805": {
     "name": "In Cold Blood",
-    "as": 8
+    "job": "Slayer",
+    "SkillsImpossible": "end",
+    "skillsId": []
   },
-  "300502": {
-    "name": "Headlong Rush III",
-    "as": 60
+  "100801": {
+    "name": "Deadly Gamble",
+    "job": "Warrior",
+    "SkillsImpossible": "end",
+    "skillsId": []
   },
-  "30050": {
-    "name": "Swift Arcane Barrage",
-    "as": 30
+  "100103": {
+    "name": "Assault Stance IV",
+    "job": "Warrior",
+    "SkillsImpossible": "begin",
+    "skillsId": [390100, 390130]
   },
-  "400501": {
-    "name": "Flurry of Blows II",
-    "as": 40
-  },
-  "400502": {
-    "name": "Bloodlust",
-    "as": 40
-  },
-  "503061": {
-    "name": "Mana Boost II",
-    "as": 30
-  },
-  "32060": {
-    "name": "Swift Combo Attack",
-    "as": 10
-  },
-  "10153040": {
-    "name": "Growing Fury",
-    "as": 10
-  },
-  "10151012": {
-    "name": "Quick Shadow Reaping",
-    "as": 20
+  "100201": {
+    "name": "Defensive Stance II",
+    "job": "Warrior",
+    "SkillsImpossible": "begin",
+    "skillsId": [281030, 281000]
   }
 }

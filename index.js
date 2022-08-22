@@ -9,6 +9,7 @@ module.exports = function tsc(mod) {
   const { command } = mod;
   const skillsData = require("./skillsData.json");
   const jobsName = Object.keys(skillsData);
+  const abData = require("./abData.json");
 
   const allType = {
     0: "Finished",
@@ -41,11 +42,11 @@ module.exports = function tsc(mod) {
     debug = false,
     skills_list = {},
     skills_mean = {},
-    suspiciousAction = [],
     skillNumber = 0,
     playerName = null,
     startSkill = 0,
     endSkill = 0,
+    startBeforeEnd = false,
     skillSpeed,
     skillType,
     myID = null,
@@ -60,7 +61,9 @@ module.exports = function tsc(mod) {
     skills_meanPath,
     bossCondition = true,
     bossEngaged = false,
-    autoSave = true;
+    autoSave = true,
+    SkillsImpossible = {};
+  skillReplaced = false;
   let skillsName = skillsData[jobsName[jobNumber]];
 
   command.add("cast", (arg1, arg2) => {
@@ -106,7 +109,6 @@ module.exports = function tsc(mod) {
       saveJsonData(skills_meanPath, skills_mean);
       skills_list = {};
       skills_mean = {};
-      suspiciousAction = [];
       skillNumber = 0;
       bossEngaged = false;
       command.message("Skills cast is save and reset");
@@ -161,10 +163,10 @@ module.exports = function tsc(mod) {
       playerId = event.gameId;
       jobNumber = (event.templateId - 10101) % 100;
       skillsName = skillsData[jobsName[jobNumber]];
-      mod.send("C_REQUEST_USER_PAPERDOLL_INFO", 3, {
-        zoom: false,
-        name: playerName,
-      });
+      // mod.send("C_REQUEST_USER_PAPERDOLL_INFO", 3, {
+      //   zoom: false,
+      //   name: playerName,
+      // });
       command.message(playerName + " found ! Class : " + jobsName[jobNumber]);
       debug ? console.log("playerId hooked : " + playerHooked1) : "";
       debug ? console.log("id : " + event.playerId) : "";
@@ -203,6 +205,7 @@ module.exports = function tsc(mod) {
         }
         debug ? console.log("My Skill :" + event.gameId) : "";
         startSkill = Date.now();
+        startBeforeEnd = startSkill < endSkill ? true : false;
         skillSpeed = event.speed;
         debug
           ? console.log("Skill id :" + Math.floor(event.skill.id / 10000))
@@ -288,7 +291,7 @@ module.exports = function tsc(mod) {
     if (bossEngaged) {
       if (event.gameId == bossId) {
         command.message(
-          "Boss is read or reset" + (autoSave ? " - Auto-Save" : "") + "."
+          "Boss is dead or reset" + (autoSave ? " - Auto-Save" : "") + "."
         );
         if (autoSave) {
           addInfoSkillList();
@@ -297,7 +300,6 @@ module.exports = function tsc(mod) {
           saveJsonData(skills_meanPath, skills_mean);
           skills_list = {};
           skills_mean = {};
-          suspiciousAction = [];
           skillNumber = 0;
           bossEngaged = false;
         }
@@ -305,7 +307,50 @@ module.exports = function tsc(mod) {
     }
   });
 
+  mod.hook("S_ABNORMALITY_BEGIN", 4, (event) => {
+    if (!isEnabled) return;
+    if (event.target == playerId || event.source == playerId) {
+      if (abData.includes(event.id) && abData[event.id].job == jobsName) {
+        if (abData[event.id].SkillsImpossible == "begin") {
+          SkillsImpossible[event.id] = {
+            buff: abData[event.id].name,
+            skillsId: abData[event.id].skillsId,
+          };
+        }
+        if (abData[event.id].SkillsImpossible == "end") {
+          delete SkillsImpossible[event.id];
+        }
+      }
+    }
+  });
+
+  mod.hook("S_ABNORMALITY_END", 1, (event) => {
+    if (!isEnabled) return;
+    if (event.target == playerId) {
+      if (abData.includes(event.id) && abData[event.id].job == jobsName) {
+        if (abData[event.id].SkillsImpossible == "end") {
+          SkillsImpossible[event.id] = {
+            buff: abData[event.id].name,
+            skillsId: abData[event.id].skillsId,
+          };
+        }
+        if (abData[event.id].SkillsImpossible == "begin") {
+          delete SkillsImpossible[event.id];
+        }
+      }
+    }
+  });
+
+  // mod.hook("_", 0, (event) => {
+
+  // });
+
   function addSkill(skillId, speed) {
+    for (const abId in SkillsImpossible) {
+      if (SkillsImpossible[abId].includes(skillId)) {
+        skillReplaced = true;
+      }
+    }
     skills_list[skillNumber] = {
       skillName:
         skillsName[Math.floor(skillId / 10000)] +
@@ -317,12 +362,15 @@ module.exports = function tsc(mod) {
       animCalculed: Math.round(
         (skillNumber == 0 ? 0 : endSkill - startSkill) * speed
       ),
+      startBeforeEnd: startBeforeEnd,
+      // "skillReplaced ?": skillReplaced ? "Yes" : "No",
       action: skillType,
     };
     debug ? console.log("castTime :" + skills_list[skillNumber].castTime) : "";
     debug
       ? console.log("currentSpeed :" + skills_list[skillNumber].currentSpeed)
       : "";
+    skillReplaced = false;
     skillNumber++;
   }
 
@@ -357,7 +405,6 @@ module.exports = function tsc(mod) {
     for (const name in skills_mean) {
       if (skills_mean[name].NumberOfCast != 0) {
         skills_mean[name] = {
-          // * 2.08 is max att speed
           castTimeMini: Math.floor(skills_mean[name].castTimeMini),
           AnimationMean: Math.floor(
             skills_mean[name].allAnimCalculedTime /
@@ -371,22 +418,10 @@ module.exports = function tsc(mod) {
   }
 
   function addInfoSkillList() {
-    for (const element in skills_list) {
-      if (
-        !isNaN(skills_list[element].action) ||
-        skills_list[element].action == allType[12394123] ||
-        skills_list[element].action == allType[0x02]
-      ) {
-        if (!suspiciousAction.includes(skills_list[element].action)) {
-          suspiciousAction.push(skills_list[element].action);
-        }
-      }
-    }
     // debug ? console.log("reform :" + skills_list) : "";
     skills_list["Player info"] = {
       Name: playerName != null ? playerName : myName,
       job: jobsName[jobNumber],
-      suspiciousAction: suspiciousAction,
     };
   }
 
@@ -400,7 +435,6 @@ module.exports = function tsc(mod) {
   function reset() {
     skills_list = {};
     skills_mean = {};
-    suspiciousAction = [];
     jobNumber = myJobNumber;
     skillsName = skillsData[jobsName[jobNumber]];
     skillNumber = 0;
