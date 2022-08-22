@@ -5,36 +5,62 @@ if (!fs.existsSync(path.join(__dirname, "./save"))) {
   fs.mkdirSync(path.join(__dirname, "./save"));
 }
 
-module.exports = function tsl(mod) {
+module.exports = function tsc(mod) {
   const { command } = mod;
-  const { player } = mod.require.library;
   const skillsData = require("./skillsData.json");
   const jobsName = Object.keys(skillsData);
-  const abnormality = require("./abData.json");
+
+  const allType = {
+    0: "Finished",
+    1: "Cancel (lockon)",
+    2: "Cancel (movement/etc.)",
+    3: "Special Interrupt (ex. Lancer: Shield Counter)",
+    4: "Chain",
+    5: "Retaliate",
+    6: "Interrupt",
+    9: "Unknown (HB-Recall, knockdown) ?",
+    10: "Button Release",
+    11: "Button Release + Chain (ex. Mystic: Corruption Ring)",
+    13: "Out of Stamina",
+    19: "Invalid Target",
+    25: "Unknown (ex. Command: Recall)",
+    29: "Interrupted by Terrain (ex. entering water)",
+    36: "Lockon Cast",
+    37: "Interrupted by Loading",
+    39: "Dash Finished",
+    43: "Interrupted by Cutscene",
+    49: "HB-Recall",
+    51: "Finished + Button Release (ex. Brawler: Counter)",
+    60: "Unknown (dodge / backstab) ?  ",
+    699: "Unknown (used for movement skill) ?",
+    12394123: "Fast script !",
+    0x02: "Bern Force End ?",
+  };
 
   let isEnabled = true,
     debug = false,
     skills_list = {},
     skills_mean = {},
-    aspd = player["aspd"],
-    aspdDivider = aspd,
-    additionalAS = 0,
+    suspiciousAction = [],
     skillNumber = 0,
     playerName = null,
-    startTimeNewSkill = 0,
-    startTimePreviousSkill = 0,
+    startSkill = 0,
+    endSkill = 0,
+    skillSpeed,
+    skillType,
     myID = null,
     myName = null,
     playerId = null,
-    animDuration = null,
+    bossId = null,
     playerHooked1 = true,
     playerHooked2 = true,
-    playerHooked3 = true,
+    myJobNumber = null,
     jobNumber = null,
-    abId,
     skills_listPath,
-    skills_meanPath;
-
+    skills_meanPath,
+    bossCondition = true,
+    bossEngaged = false,
+    autoSave = true;
   let skillsName = skillsData[jobsName[jobNumber]];
 
   command.add("cast", (arg1, arg2) => {
@@ -45,13 +71,13 @@ module.exports = function tsl(mod) {
       }
       reset();
       command.message(
-        "Skills List is now " + (isEnabled ? "enabled" : "disabled") + "."
+        "Skills cast is now " + (isEnabled ? "enabled" : "disabled") + "."
       );
     }
     if (arg1 == "save") {
       let today = new Date();
       skills_listPath =
-        "./save/skills_list-" +
+        "./save/" +
         jobsName[jobNumber] +
         "-" +
         (playerName != null ? playerName : myName) +
@@ -61,9 +87,9 @@ module.exports = function tsl(mod) {
         today.getMinutes() +
         "-" +
         today.getSeconds() +
-        ".json";
+        "-skills_list.json";
       skills_meanPath =
-        "./save/skills_mean-" +
+        "./save/" +
         jobsName[jobNumber] +
         "-" +
         (playerName != null ? playerName : myName) +
@@ -73,53 +99,59 @@ module.exports = function tsl(mod) {
         today.getMinutes() +
         "-" +
         today.getSeconds() +
-        ".json";
-      reformateSkillList();
+        "-skills_mean.json";
+      addInfoSkillList();
       saveJsonData(skills_listPath, skills_list);
       calculMean(skills_list);
       saveJsonData(skills_meanPath, skills_mean);
-      reset();
+      skills_list = {};
+      skills_mean = {};
+      suspiciousAction = [];
+      skillNumber = 0;
+      bossEngaged = false;
+      command.message("Skills cast is save and reset");
     }
     if (arg1 == "reset") {
-      command.message("Skills List is reset");
+      command.message("Skills cast is reset");
+      reset();
+    }
+    if (arg1 == "boss") {
+      bossCondition = !bossCondition;
+      command.message(
+        "Will start only when boss is engaged : " +
+          (bossCondition ? "enabled" : "disabled") +
+          "."
+      );
       reset();
     }
     if (arg1 == "debug") {
       debug = !debug;
       command.message(
-        "Skills List Debug is now " + (debug ? "enabled" : "disabled") + "."
+        "Skills cast Debug is now " + (debug ? "enabled" : "disabled") + "."
       );
     }
     if (arg1 == "target") {
       reset();
       if (arg2 != null) {
-        command.message("Skills List target is now " + arg2);
+        command.message("Skills cast target is now " + arg2);
         playerName = arg2;
         playerHooked1 = false;
       } else {
         playerHooked2 = false;
         command.message("Please inspect the player");
       }
-      playerHooked3 = false;
     }
   });
 
   mod.hook("S_LOGIN", 14, (event) => {
     if (!isEnabled) return;
-    jobNumber = (event.templateId - 10101) % 100;
-    aspdDivider = jobNumber >= 8 ? 100 : event.attackSpeed;
+    myJobNumber = (event.templateId - 10101) % 100;
+    jobNumber = myJobNumber;
     skillsName = skillsData[jobsName[jobNumber]];
     myID = event.gameId;
     myName = event.name;
     debug ? console.log("your Id :" + event.gameId) : "";
     debug ? console.log("your job :" + jobsName[jobNumber]) : "";
-  });
-
-  mod.hook("S_PLAYER_STAT_UPDATE", 14, (event) => {
-    if (!isEnabled || playerName != null || !player.inCombat) return;
-    calculTrueAS(event.attackSpeed, event.attackSpeedBonus, 0);
-    debug ? console.log("aspd :" + aspd) : "";
-    debug ? console.log("aspdDivider :" + aspdDivider) : "";
   });
 
   mod.hook("S_SPAWN_USER", 17, (event) => {
@@ -128,7 +160,6 @@ module.exports = function tsl(mod) {
       playerHooked1 = true;
       playerId = event.gameId;
       jobNumber = (event.templateId - 10101) % 100;
-      aspdDivider = jobNumber >= 8 ? 100 : event.attackSpeed;
       skillsName = skillsData[jobsName[jobNumber]];
       mod.send("C_REQUEST_USER_PAPERDOLL_INFO", 3, {
         zoom: false,
@@ -141,62 +172,20 @@ module.exports = function tsl(mod) {
     }
   });
 
-  mod.hook("S_USER_PAPERDOLL_INFO", 11, (event) => {
-    if (!isEnabled) return;
-    if (!playerHooked2) {
-      playerHooked2 = true;
-      playerId = event.gameId;
-      jobNumber = (event.templateId - 10101) % 100;
-      aspdDivider = jobNumber >= 8 ? 100 : event.attackSpeed;
-      skillsName = skillsData[jobsName[jobNumber]];
-      playerName = event.name;
-      command.message(playerName + " found ! Class : " + jobsName[jobNumber]);
-    }
-    if (playerName != null) {
-      calculTrueAS(event.attackSpeed, event.attackSpeedBonus);
-      debug ? console.log("aspd :" + aspd) : "";
-      debug ? console.log("aspdDivider :" + aspdDivider) : "";
-    }
-  });
-
   mod.hook(
-    "S_ABNORMALITY_BEGIN",
-    4,
+    "S_USER_PAPERDOLL_INFO",
     // { order: 999999, filter: { fake: null, silenced: null, modified: null } },
+    11,
     (event) => {
       if (!isEnabled) return;
-      abId = JSON.stringify(event.id);
-      // debug ? console.log("Id : " + abId) : "";
-      // debug ? console.log("Source : " + event.source) : "";
-      // debug ? console.log("target : " + event.target) : "";
-      if (!Object.keys(abnormality).includes(abId)) return;
-      if (playerId == null) return;
-      if (event.source == playerId || event.target == playerId) {
-        debug ? console.log("Id : " + abId) : "";
-        debug ? console.log("Source : " + event.source) : "";
-        debug ? console.log("target : " + event.target) : "";
-        debug ? console.log("Name : " + abnormality[abId].name) : "";
-        additionalAS = abnormality[abId].as;
-        calculTrueAS(aspd * aspdDivider, additionalAS);
-        debug ? console.log("additionalAS : " + additionalAS) : "";
-        debug ? console.log("aspd :" + aspd) : "";
-      }
-    }
-  );
-
-  mod.hook(
-    "S_ABNORMALITY_END",
-    1,
-    { order: 999999, filter: { fake: null, silenced: null, modified: null } },
-    (event) => {
-      if (!isEnabled) return;
-      abId = JSON.stringify(event.id);
-      if (!Object.keys(abnormality).includes(abId)) return;
-      if (event.source == playerId || event.target == playerId) {
-        additionalAS = -abnormality[abId].as;
-        calculTrueAS(aspd * aspdDivider, additionalAS);
-        debug ? console.log("additionalAS : " + additionalAS) : "";
-        debug ? console.log("aspd :" + aspd) : "";
+      // debug ? saveJsonData("./save/S_USER_PAPERDOLL_INFO.json", event) : "";
+      if (!playerHooked2) {
+        playerHooked2 = true;
+        playerId = event.gameId;
+        jobNumber = (event.templateId - 10101) % 100;
+        skillsName = skillsData[jobsName[jobNumber]];
+        playerName = event.name;
+        command.message(playerName + " found ! Class : " + jobsName[jobNumber]);
       }
     }
   );
@@ -206,16 +195,36 @@ module.exports = function tsl(mod) {
     9,
     { order: -1000000, filter: { fake: true } },
     (event) => {
-      if (!isEnabled) return;
-      if (myID == event.gameId && player.inCombat) {
+      if (!isEnabled || playerId != null) return;
+      // debug ? saveJsonData("./save/S_ACTION_STAGE.json", event) : "";
+      if (myID == event.gameId && (!bossCondition || bossEngaged)) {
+        if (skillNumber == 0) {
+          command.message("Skills cast start to hook " + myName + ".");
+        }
         debug ? console.log("My Skill :" + event.gameId) : "";
-        startTimeNewSkill = Date.now();
-        // animDuration = event.animSeq[0];
+        startSkill = Date.now();
+        skillSpeed = event.speed;
         debug
           ? console.log("Skill id :" + Math.floor(event.skill.id / 10000))
           : "";
-        addSkill(event.skill.id);
-        // previousSkill = event.skill.id;
+        debug ? console.log("Speed skill :" + event.speed) : "";
+      }
+    }
+  );
+
+  mod.hook(
+    "S_ACTION_END",
+    5,
+    { order: -1000000, filter: { fake: true } },
+    (event) => {
+      if (!isEnabled || playerId != null) return;
+      if (myID == event.gameId && (!bossCondition || bossEngaged)) {
+        endSkill = Date.now();
+        debug ? console.log("Event Type :" + event.type) : "";
+        allType[event.type]
+          ? (skillType = allType[event.type])
+          : (skillType = event.type);
+        addSkill(event.skill.id, skillSpeed);
       }
     }
   );
@@ -226,42 +235,94 @@ module.exports = function tsl(mod) {
     { order: 999999, filter: { fake: null, silenced: null, modified: null } },
     (event) => {
       if (!isEnabled) return;
-      if (playerId == event.gameId) {
-        debug ? console.log("Target use Skill :" + event.gameId) : "";
-        startTimeNewSkill = Date.now();
-        // animDuration = event.animSeq[0];
+      if (playerId == event.gameId && (!bossCondition || bossEngaged)) {
+        if (skillNumber == 0) {
+          command.message("Skills cast start to hook " + playerName + ".");
+        }
+        debug ? console.log("My Skill :" + event.gameId) : "";
+        startSkill = Date.now();
+        skillSpeed = event.speed;
         debug
           ? console.log("Skill id :" + Math.floor(event.skill.id / 10000))
           : "";
-        addSkill(event.skill.id);
+        debug ? console.log("Speed skill :" + event.speed) : "";
       }
     }
   );
 
-  // mod.hook('C_CANCEL_SKILL', 3, event => {
+  mod.hook(
+    "S_ACTION_END",
+    5,
+    { order: 999999, filter: { fake: null, silenced: null, modified: null } },
+    (event) => {
+      if (!isEnabled) return;
+      if (playerId == event.gameId && (!bossCondition || bossEngaged)) {
+        endSkill = Date.now();
+        debug ? console.log("Event Type :" + event.type) : "";
+        allType[event.type]
+          ? (skillType = allType[event.type])
+          : (skillType = event.type);
+        addSkill(event.skill.id, skillSpeed);
+      }
+    }
+  );
 
-  // });
+  mod.hook("S_BOSS_GAGE_INFO", 3, (event) => {
+    if (!isEnabled) return;
+    if (bossCondition && !bossEngaged) {
+      if (bossId != event.gameId) {
+        reset();
+      }
+      if (event.maxHp != event.curHp) {
+        bossEngaged = true;
+        command.message("Boss Engaged !");
+        bossId = event.gameId;
+      } else {
+        bossEngaged = false;
+      }
+    }
+  });
 
-  function calculTrueAS(defaultAS, bonusAS) {
-    aspd = Math.round(defaultAS + bonusAS) / aspdDivider;
-  }
+  mod.hook("S_DESPAWN_NPC", 3, (event) => {
+    if (!isEnabled) return;
+    if (bossEngaged) {
+      if (event.gameId == bossId) {
+        command.message(
+          "Boss is read or reset" + (autoSave ? " - Auto-Save" : "") + "."
+        );
+        if (autoSave) {
+          addInfoSkillList();
+          saveJsonData(skills_listPath, skills_list);
+          calculMean(skills_list);
+          saveJsonData(skills_meanPath, skills_mean);
+          skills_list = {};
+          skills_mean = {};
+          suspiciousAction = [];
+          skillNumber = 0;
+          bossEngaged = false;
+        }
+      }
+    }
+  });
 
-  function addSkill(skillId) {
+  function addSkill(skillId, speed) {
     skills_list[skillNumber] = {
       skillName:
-        skillsName[Math.floor(skillId / 10000)] + "-" + (skillId % 100),
+        skillsName[Math.floor(skillId / 10000)] +
+        "-" +
+        (skillId - Math.floor(skillId / 10000) * 10000),
       Skill_Id: skillId,
-      castTime:
-        skillNumber == 0 ? 0 : startTimeNewSkill - startTimePreviousSkill,
-      currentSpeed: aspd * 100,
-      // animDuration: animDuration,
-      animCalculed: null,
+      castTime: skillNumber == 0 ? 0 : endSkill - startSkill,
+      currentSpeed: Math.round(speed * 100),
+      animCalculed: Math.round(
+        (skillNumber == 0 ? 0 : endSkill - startSkill) * speed
+      ),
+      action: skillType,
     };
     debug ? console.log("castTime :" + skills_list[skillNumber].castTime) : "";
     debug
       ? console.log("currentSpeed :" + skills_list[skillNumber].currentSpeed)
       : "";
-    startTimePreviousSkill = startTimeNewSkill;
     skillNumber++;
   }
 
@@ -309,24 +370,23 @@ module.exports = function tsl(mod) {
     }
   }
 
-  function reformateSkillList() {
+  function addInfoSkillList() {
     for (const element in skills_list) {
-      if (skills_list[parseInt(element) + 1]) {
-        skills_list[element].castTime =
-          skills_list[parseInt(element) + 1].castTime;
-      } else {
-        skills_list[element].castTime = 0;
+      if (
+        !isNaN(skills_list[element].action) ||
+        skills_list[element].action == allType[12394123] ||
+        skills_list[element].action == allType[0x02]
+      ) {
+        if (!suspiciousAction.includes(skills_list[element].action)) {
+          suspiciousAction.push(skills_list[element].action);
+        }
       }
-      skills_list[element].animCalculed = Math.floor(
-        (skills_list[element].castTime * skills_list[element].currentSpeed) /
-          100
-      );
     }
-    debug ? console.log("reform :" + skills_list) : "";
+    // debug ? console.log("reform :" + skills_list) : "";
     skills_list["Player info"] = {
       Name: playerName != null ? playerName : myName,
       job: jobsName[jobNumber],
-      Id: playerId != null ? parseInt(playerId) : parseInt(myID),
+      suspiciousAction: suspiciousAction,
     };
   }
 
@@ -340,16 +400,17 @@ module.exports = function tsl(mod) {
   function reset() {
     skills_list = {};
     skills_mean = {};
-    aspd = player["aspd"];
-    additionalAS = 0;
+    suspiciousAction = [];
+    jobNumber = myJobNumber;
+    skillsName = skillsData[jobsName[jobNumber]];
     skillNumber = 0;
-    playerName = null;
-    startTimeNewSkill = 0;
-    startTimePreviousSkill = 0;
+    playerName = myName;
+    startSkill = 0;
+    endSkill = 0;
     playerId = null;
-    animDuration = null;
+    bossId = null;
     playerHooked1 = true;
     playerHooked2 = true;
-    playerHooked3 = true;
+    bossEngaged = false;
   }
 };
