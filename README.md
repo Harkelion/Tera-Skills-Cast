@@ -6,7 +6,6 @@ Skills are instantly in cooldown as soon as they are used
 
 ```txt
 /8 icd                      : enable/disable
-
 ```
 
 #### Known issues :
