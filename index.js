@@ -207,6 +207,7 @@ module.exports = function tsc(mod) {
         startSkill = Date.now();
         startBeforeEnd = startSkill < endSkill ? true : false;
         skillSpeed = event.speed;
+        interSkills(skillNumber);
         debug
           ? console.log("Skill id :" + Math.floor(event.skill.id / 10000))
           : "";
@@ -374,6 +375,15 @@ module.exports = function tsc(mod) {
     skillNumber++;
   }
 
+  function interSkills(skillNumber) {
+    if (skillNumber < 1) return;
+    let interskillNumber = skillNumber - 1 + "-" + skillNumber;
+    skills_list[interskillNumber] = {
+      PreviousSkill: skills_list[skillNumber - 1].skillName,
+      DelayBetween: startSkill - endSkill,
+    };
+  }
+
   function calculMean(skills_list) {
     for (const id in skillsName) {
       skills_mean[skillsName[id]] = {
@@ -399,6 +409,13 @@ module.exports = function tsc(mod) {
               NumberOfCast: skills_mean[skillsName[id]].NumberOfCast + 1,
             };
           }
+        }
+        if (skills_list[skillUsed].PreviousSkill) {
+          skills_mean[skills_list[skillUsed].PreviousSkill + "after"] = {
+            allDelayCalculed:
+              skills_mean[skillsName[id] + "after"].allDelayCalculed +
+              skills_list[skillUsed].DelayBetween,
+          };
         }
       }
     }
