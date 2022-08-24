@@ -25,6 +25,6 @@ Be able to detect player with animation cancel (or not) to know with who you can
 
 #### Future change :
 
-- add a cancel detector 
+- add a delay between each skill (no only timeCast of skills)
 
 Contact Discord : Harkelion#8888
