@@ -1,8 +1,8 @@
 {
-  "disableAutoUpdate": true,
+  "disableAutoUpdate": false,
   "name": "TSC",
   "author": "Hark",
-  "description": "Wanna know if someone use animiation cancel ?",
+  "description": "Wanna know all about you skill casting time and delay ?",
   "version": "1.0",
   "options": {
     "niceName": "TSC",
@@ -11,6 +11,8 @@
   "dependencies": {
     "library": "https://raw.githubusercontent.com/Kaseaa/library/master/module.json"
   },
-  "servers": [""],
+  "servers": [
+    "https://raw.githubusercontent.com/harkelion/Tera-Skills-Cast/master/"
+  ],
   "supportUrl": ""
 }
