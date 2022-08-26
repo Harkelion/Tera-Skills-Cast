@@ -212,7 +212,10 @@ module.exports = function tsc(mod) {
           command.message("Skills cast start to hook " + myName + ".");
         }
         // Prevent Double Hook client side with SP-like
-        if (event.skill.id == skills_list[skillNumber - 1].Skill_Id) return;
+         if (
+          event.skill.id == skills_list[skillNumber - 1][Skill_Id] &&
+          skills_list[skillNumber - 1][Skill_Id]
+        ) return;
         debug ? console.log("My Skill :" + event.gameId) : "";
         startSkill = Date.now();
         startBeforeEnd = startSkill < endSkill ? true : false;
