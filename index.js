@@ -38,7 +38,7 @@ module.exports = function tsc(mod) {
     0x02: "Bern Force End ?",
   };
 
-  let isEnabled = false,
+  let isEnabled = true,
     debug = false,
     skills_list = {},
     skills_mean = {},
