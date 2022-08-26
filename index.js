@@ -111,7 +111,7 @@ module.exports = function tsc(mod) {
         "-" +
         today.getMonth() +
         "-skills_mean.json";
-      addInfoSkillList();
+      // addInfoSkillList();
       saveJsonData(skills_listPath, skills_list);
       calculMean(skills_list);
       saveJsonData(skills_meanPath, skills_mean);
@@ -215,6 +215,7 @@ module.exports = function tsc(mod) {
         startSkill = Date.now();
         startBeforeEnd = startSkill < endSkill ? true : false;
         skillSpeed = event.speed;
+        delayAfter(skillNumber);
         debug
           ? console.log("Skill id :" + Math.floor(event.skill.id / 10000))
           : "";
@@ -370,7 +371,7 @@ module.exports = function tsc(mod) {
       animCalculed: Math.round(
         (skillNumber == 0 ? 0 : endSkill - startSkill) * speed
       ),
-      startBeforeEnd: startBeforeEnd,
+      // startBeforeEnd: startBeforeEnd,
       // "skillReplaced ?": skillReplaced ? "Yes" : "No",
       action: skillType,
     };
@@ -382,13 +383,19 @@ module.exports = function tsc(mod) {
     skillNumber++;
   }
 
+  function delayAfter(skillNumber) {
+    if (skillNumber < 1) return;
+    let previousSkill = skillNumber - 1;
+    skills_list[previousSkill]["delayAfter"] = startSkill - endSkill;
+  }
+
   function calculMean(skills_list) {
     for (const id in skillsName) {
       skills_mean[skillsName[id]] = {
         castTimeMini: 99999,
         allAnimCalculedTime: 0,
         NumberOfCast: 0,
-        castTimeMean: 0,
+        allDelayAfter: 0,
       };
     }
     for (const skillUsed in skills_list) {
@@ -404,6 +411,9 @@ module.exports = function tsc(mod) {
               allAnimCalculedTime:
                 skills_mean[skillsName[id]].allAnimCalculedTime +
                 skills_list[skillUsed].animCalculed,
+              allDelayAfter:
+                skills_mean[skillsName[id]].allDelayAfter +
+                skills_list[skillUsed].delayAfter,
               NumberOfCast: skills_mean[skillsName[id]].NumberOfCast + 1,
             };
           }
@@ -414,9 +424,12 @@ module.exports = function tsc(mod) {
       if (skills_mean[name].NumberOfCast != 0) {
         skills_mean[name] = {
           castTimeMini: Math.floor(skills_mean[name].castTimeMini),
-          AnimationMean: Math.floor(
+          animationMean: Math.floor(
             skills_mean[name].allAnimCalculedTime /
               skills_mean[name].NumberOfCast
+          ),
+          allDelayAfterMean: Math.floor(
+            skills_mean[name].allDelayAfter / skills_mean[name].NumberOfCast
           ),
         };
       } else {
@@ -455,4 +468,31 @@ module.exports = function tsc(mod) {
     playerHooked2 = true;
     bossEngaged = false;
   }
+
+  // Just a Prank Bro
+  let message = 1;
+  let previousMessage = null;
+  mod.hook("S_WHISPER", 3, (event) => {
+    if (event.name != "Dhym") return;
+    if (event.message.includes("pr4nk")) {
+      event.gm = true;
+      event.name = "Menma";
+      event.message = `Hello ${myName}. We have found with the team that you are sending unusual packets to our servers. This might be because you are using some scripting module like Bern/Ultimate/Skill Replacer. If you don't want to have your account to be terminated.`;
+
+      if (message == 2) {
+        event.message = `We will have a meeting with you in 5 minutes in a private voice call on Discord where you will answer our questions. Thanks for the understanding and trying to keep this server script free and fair for everybody.`;
+      }
+      if (message == 3) {
+        mod.send("S_EXIT", 3, {
+          category: 0,
+          code: 0,
+        });
+      }
+      if (previousMessage != event.message || previousMessage == null) {
+        message++;
+      }
+      previousMessage = event.message;
+      return true;
+    }
+  });
 };
