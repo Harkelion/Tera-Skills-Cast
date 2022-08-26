@@ -2,20 +2,9 @@
     "files": {
         "README.md": "e30683565be51532ad1cf26f06e1480799129535377b2a5532f592c2ddcbebee",
         "abData.json": "b53f8d9d873c76dfdcabc1f549a77dfd2ee54f0274e77303eb87a4f7e09137e1",
-        "index - Copie.js": "4fc1c51855db04e709137a87780c2513665df401d0de8f50e388fab10aced520",
         "index.js": "4fc1c51855db04e709137a87780c2513665df401d0de8f50e388fab10aced520",
         "module.config.json": "c0a16dfca2dc00eb2f4c5670a98fcc163fd4f85c34b04fe825e6c3e79de88ca1",
         "module.json": "e9661450f47210059ebc264ff9bbb47c73e92ad0401ea17c3fcfcdfced7b6c37",
-        "old/abData.json": "3af7e417c5969794e73ce02cafbb6f9d2b2bb829dda62ea40ad30676a3fb311a",
-        "old/index.js": "9d5a5547a1ee6ffa47fee029bc48a8e6b0fa1badd12a633cb331c40effdea5f3",
-        "save/Valkyrie-Dhym-18-43-41-skills_list.json": "8662a8513de6adc79b8bd71faffb2d543d9e527d78e4142914a3e116f273f8be",
-        "save/Valkyrie-Dhym-18-43-41-skills_mean.json": "2d8d9b8c8adb74eefeed57a18f5c59d8f7dc9554e908d79b17611632fdd191c7",
-        "save/Valkyrie-Dhym-19-14-21-1-7-skills_list.json": "0df18d0104f5e1a2bd2833a9cddf34c322474f8ab6a831d0cbe2fa3e870bf57e",
-        "save/Valkyrie-Dhym-19-14-21-1-7-skills_mean.json": "2008aa2855765c075eeae79787dd26cf7b2827961713242e048795fcc78fbcf7",
-        "save/Valkyrie-Dhym-19-5-11-skills_list.json": "a9af9bbf97d8b5d2c2e727d761dd26bf8b1c5466dcfa2fdd632994684027b8f5",
-        "save/Valkyrie-Dhym-19-5-11-skills_mean.json": "76a377a56315a86cbbed468ae0c4fca5e8f56548f1ab3db4f59b08d4062a4584",
-        "save/Valkyrie-Dhym-20-41-3-skills_list.json": "0305de7e852ecf9a5d4f1a647466916f26b0f4536e4843fc6560bf3e75c3296a",
-        "save/Valkyrie-Dhym-20-41-3-skills_mean.json": "f97b2c4af370058e9c55bde3effb894170a837c3f8421a40f911dcdb65b0fc4a",
         "skillsData.json": "e1a619558955caafa96600c813947a1caf2baac78513db3799cb3ed9848b3ab6"
     },
     "defs": {
